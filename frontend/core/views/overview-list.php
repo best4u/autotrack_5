@@ -8,9 +8,7 @@ $price_color = get_option("at_price_color");
     }
 </style>
 
-<pre>
-    <?php var_dump($all_occasions->total); ?>
-</pre>
+
 <div class="overview_gridWrapp listMode">
     <div class="leftAndRightWrapp">
         <div class="centerDiv">
