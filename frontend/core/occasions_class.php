@@ -72,12 +72,64 @@ class Ocassions
 
     // Here we format in the correct way the kenketen value
 
-    function kenteken_format($value){
-        $formated_val = substr($value,0,2).'-';
-        $formated_val .= substr($value,2,2).'-';
-        $formated_val .= substr($value,4,4);
-        $formated_val = strtoupper($formated_val);
-        return strtoupper($formated_val);
+    function kenteken_format($occasion){
+        $value = $occasion->kenteken;
+        $car_year = $occasion->geschiedenis->bouwjaar;
+
+        $formated_val = '';
+
+        if($car_year <= '2008'){
+            $formated_val = substr($value,0,2).'-';
+            $formated_val .= substr($value,2,2).'-';
+            $formated_val .= substr($value,4,4);
+            $formated_val = strtoupper($formated_val);
+        }else{
+            preg_match_all('/([0-9]+|[a-zA-Z]+)/',$value,$matches);
+      
+        foreach ($matches[0] as $key => $val) {
+            if($key == 0 || $key == 1){
+                $formated_val .= $val.'-';
+            }else{
+                $formated_val .= $val;
+            }
+        }
+        }
+    
+        return $formated_val;
+    }
+
+    function test_func(){
+        $value = $occasion->kenteken;
+        $car_year = $occasion->geschiedenis->bouwjaar;
+
+        $formated_val = '';
+        if($car_year >= '2000' && $car_year <= '2007'){
+
+            $formated_val = substr($value,0,2).'-';
+            $formated_val .= substr($value,2,2).'-';
+            $formated_val .= substr($value,4,4);
+            $formated_val = strtoupper($formated_val);
+
+        }elseif($car_year >= '2008' && $car_year <= '2013'){
+
+            $formated_val = substr($value,0,2).'-';
+            $formated_val .= substr($value,2,3).'-';
+            $formated_val .= substr($value,5,1);
+            $formated_val = strtoupper($formated_val);
+
+        }elseif($car_year >= '2014' && $car_year <= '2015'){
+            $formated_val = substr($value,0,1).'-';
+            $formated_val .= substr($value,2,3).'-';
+            $formated_val .= substr($value,4,5);
+            $formated_val = strtoupper($formated_val);
+        }else{
+            $formated_val = substr($value,0,3).'-';
+            $formated_val .= substr($value,3,2).'-';
+            $formated_val .= substr($value,5,1);
+            $formated_val = strtoupper($formated_val);
+        }
+        
+        return $formated_val;
     }
 
 // Here we store all address information and make html structure
@@ -130,7 +182,9 @@ class Ocassions
      
         $uitvoering  = str_replace('"','',$occasion->algemeen->uitvoering);
         $uitvoering  = str_replace('/','-',$uitvoering);
-        return trim(strtolower($occasion->algemeen->merkNaam)) . "-" . trim(strtolower($occasion->algemeen->modelNaam)). "-" .str_replace(" ","-",strtolower($uitvoering));
+        $slug = trim(strtolower($occasion->algemeen->merkNaam)) . "-" . trim(strtolower($occasion->algemeen->modelNaam)). "-" .str_replace(" ","-",strtolower($uitvoering));
+        $slug = str_replace("%","", $slug);
+        return $slug;
     }
 
     // Here we get correct car price
@@ -154,7 +208,7 @@ class Ocassions
     // Check if car have NapLogo
     function get_nap_logo($occasion){
      
-         if($occasion->geschiedenis->kilometerstandCorrect === true){
+         if(isset($occasion->geschiedenis->kilometerstandCorrect) && $occasion->geschiedenis->kilometerstandCorrect === true){
             return true;
         }else{
             return false;
@@ -201,6 +255,7 @@ class Ocassions
 
         foreach ($results as $item) {
             ${"object"} = $item->category;
+             ${"selector"} = $item->type;
             if(${"object"} == "garanties"){
 
                 foreach($occasion->${"object"}->garantieIds as $id){
@@ -240,7 +295,7 @@ class Ocassions
                 $options[] = [$item->category => [$item->name => $occasion->${"object"}->${"selector"}->standaard]];
             } elseif ($item->type == "kenteken") {
                 ${"selector"} = $item->type;
-                $options[] = [$item->category => [$item->name => $this->kenteken_format($occasion->${"selector"})]];
+                $options[] = [$item->category => [$item->name => $this->kenteken_format($occasion)]];
             } elseif ($item->type == "prijs") {
                 ${"selector"} = $item->type;
                 $options[] = [
@@ -342,6 +397,7 @@ class Ocassions
 
         foreach ($results as $item) {
             ${"object"} = $item->category;
+             ${"selector"} = $item->type;
             if(${"object"} == "garanties"){
 
                 foreach($occasion->${"object"}->garantieIds as $id){
@@ -381,7 +437,7 @@ class Ocassions
                 $options[] = [$item->category => [$item->name => $occasion->${"object"}->${"selector"}->standaard]];
             } elseif ($item->type == "kenteken") {
                 ${"selector"} = $item->type;
-                $options[] = [$item->category => [$item->name => $this->kenteken_format($occasion->${"selector"})]];
+                $options[] = [$item->category => [$item->name => $this->kenteken_format($occasion)]];
             } elseif ($item->type == "prijs") {
                 ${"selector"} = $item->type;
                 $options[] = [
@@ -483,6 +539,7 @@ class Ocassions
 
         foreach ($results as $item) {
             ${"object"} = $item->category;
+             ${"selector"} = $item->type;
             if(${"object"} == "garanties"){
                 foreach($occasion->${"object"}->garantieIds as $id){
                     $garanties_item = $this->connection_to_api("garanties/", $id);
@@ -521,7 +578,7 @@ class Ocassions
                 $options[] = [$item->category => [$item->name => $occasion->${"object"}->${"selector"}->standaard]];
             } elseif ($item->type == "kenteken") {
                 ${"selector"} = $item->type;
-                $options[] = [$item->category => [$item->name => $this->kenteken_format($occasion->${"selector"})]];
+                $options[] = [$item->category => [$item->name => $this->kenteken_format($occasion)]];
             } elseif ($item->type == "prijs") {
                 ${"selector"} = $item->type;
                 $options[] = [
@@ -606,7 +663,6 @@ class Ocassions
                 }
 
             }
-
         }
 
         return $options;
@@ -626,6 +682,7 @@ class Ocassions
         foreach ($results as $item) {
 
             ${"object"} = $item->category;
+             ${"selector"} = $item->type;
 
             if(${"object"} == "garanties"){
 
@@ -647,6 +704,7 @@ class Ocassions
 
                    
                 }else{
+                    if(isset($occasion->${"object"}->${"selector"}))
                     $options[] = [$item->category => [$item->type => $occasion->${"object"}->${"selector"} != "" ? $occasion->${"object"}->${"selector"} : "-"]];
                 }
             }elseif($item->type == "btwVerrekenbaar"){
@@ -659,7 +717,6 @@ class Ocassions
             
                     
             }elseif($item->type == "merkId") {
-                
                 $options[] = [$item->category => [$item->name => $occasion->algemeen->merkNaam]];
             } elseif ($item->type == "modelId") {
                
@@ -669,7 +726,7 @@ class Ocassions
                 $options[] = [$item->category => [$item->name => $occasion->${"object"}->${"selector"}->standaard]];
             } elseif ($item->type == "kenteken") {
                 ${"selector"} = $item->type;
-                $options[] = [$item->category => [$item->name => $this->kenteken_format($occasion->${"selector"})]];
+                $options[] = [$item->category => [$item->name => $this->kenteken_format($occasion)]];
             } elseif ($item->type == "prijs") {
                 ${"selector"} = $item->type;
                 $options[] = [
@@ -813,8 +870,8 @@ class Ocassions
         foreach ($garanties_ids as $key => $value) {
 
            $garanties_item = $this->connection_to_api("garanties/", $value);
-        
-                $garanties_names[] = $garanties_item->naam;
+
+              $garanties_names[$garanties_item->naam] = $garanties_item->omschrijving;
          
         }
         

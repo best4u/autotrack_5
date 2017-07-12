@@ -9,31 +9,13 @@ ini_set('max_execution_time', 30000);
 
 function drop_tables()
 {
-    $host = DB_HOST;
-    $dbname = DB_NAME;
-    $user = DB_USER;
-    $pass = DB_PASSWORD;
-    $conn = new mysqli($host, $user, $pass, $dbname);
-
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
+    global $wpdb;
     $sql = "DROP TABLE IF EXISTS wp_at_attributes";
-    $conn->query($sql);
+    $wpdb->query($sql);
 }
 
 function db_install() {
-
-    $host = DB_HOST;
-    $dbname = DB_NAME;
-    $user = DB_USER;
-    $pass = DB_PASSWORD;
-    $conn = new mysqli($host, $user, $pass, $dbname);
-
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
+    global $wpdb;
     $sql = "CREATE TABLE wp_at_attributes (
               id int(11) NOT NULL AUTO_INCREMENT,
               category varchar(255) NOT NULL,
@@ -50,7 +32,9 @@ function db_install() {
               option_category_id varchar(255) DEFAULT NULL,
               PRIMARY KEY (id)
             ) ";
-    $conn->query($sql);
+
+require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+dbDelta( $sql );
 }
 
 function insert_data_attr()
@@ -123,23 +107,12 @@ function insert_data_attr()
 
     $ocassions_obj = new Ocassions();
     $options = $ocassions_obj->connection_to_api('opties',"?pageNumber=1&pageSize=500");
-
-
-
-    $host = DB_HOST;
-    $dbname = DB_NAME;
-    $user = DB_USER;
-    $pass = DB_PASSWORD;
-    $conn = new mysqli($host, $user, $pass, $dbname);
-
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
+    global $wpdb;
 
     foreach($arr as $row)
     {
         $sql = $row;
-        $conn->query($sql);
+        $wpdb->query($sql);
     }
 
     foreach($options->items as $option){
@@ -152,13 +125,10 @@ function insert_data_attr()
                     $category_name = $cat->naam;
                 }
             }
-
         }
 
         $sql = "INSERT INTO `wp_at_attributes` VALUES ('', '".$category_name."', '".$option->naam."','5', '0', '0', '0', '1', '','','1','".$option->optieId."','".$option->optiecategorieId."')";
-        $conn->query($sql);
+        $wpdb->query($sql);
     }
-
-
 
 }

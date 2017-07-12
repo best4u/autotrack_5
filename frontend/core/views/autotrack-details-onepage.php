@@ -15,8 +15,6 @@ $price_color = get_option("at_price_color");
         margin-top: 10px;
     }
 </style>
-
-
 <div class="overview_gridWrapp">
 
     <div class="leftAndRightWrapp singleItemWrapp">
@@ -337,10 +335,11 @@ $price_color = get_option("at_price_color");
 
                                 <div class="descAlgemen commDesc text_color">
                                     <div class="commLeftSpecific between">
-                                    <?php foreach ($garanties as $value):?>
+                                    <?php foreach ($garanties as $key => $value):?>
                                             <span class="optionsWrap">
                                                 <span class="leftDescSpan">
-                                                    <?=$value?>
+                                                    <b><?=$key?></b>
+                                                    <p> - <?=$value?></p>
                                                 </span>
                                                 <span class="rightDescSpan">
                                                 </span>
